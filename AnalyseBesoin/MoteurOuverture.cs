@@ -3,6 +3,7 @@
 public class MoteurOuverture
 {
     private readonly AssociationsLecteurPorte _associations = new ();
+    private readonly HashSet<NuméroBadge> _listeNoire = new();
 
     public void Interroger()
     {
@@ -10,8 +11,15 @@ public class MoteurOuverture
         var portesAOuvrir = new HashSet<IPorte>();
 
         foreach (var lecteur in lecteurs)
-        foreach (var porte in lecteur.Portes)
-            portesAOuvrir.Add(porte);
+        {
+            var badge = lecteur.BadgeDétecté;
+            if(_listeNoire.Contains(badge)) 
+                continue;
+
+            foreach (var porte in lecteur.Portes)
+                portesAOuvrir.Add(porte);
+        }
+            
 
         foreach (var porte in portesAOuvrir)
             porte.Ouvrir();
@@ -20,5 +28,15 @@ public class MoteurOuverture
     public void Associer(ILecteur lecteur, IPorte porte)
     {
         _associations.Enregistrer(lecteur, porte);
+    }
+
+    public void Bloquer(NuméroBadge badge)
+    {
+        _listeNoire.Add(badge);
+    }
+
+    public void Débloquer(NuméroBadge badge)
+    {
+        _listeNoire.Remove(badge);
     }
 }

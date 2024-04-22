@@ -70,6 +70,49 @@ public class ControleAccesTest
     }
 
     [Fact]
+    public void CasBadgeBloqué()
+    {
+        // ETANT DONNE une Porte reliée à un Lecteur, ayant détecté un Badge bloqué
+        var porte = new PorteTest();
+        var lecteur = new LecteurTest();
+        var badge = new NuméroBadge(1);
+
+        lecteur.SimulerDétectionBadge(badge);
+
+        var moteurOuverture = new MoteurOuverture();
+        moteurOuverture.Associer(lecteur, porte);
+        moteurOuverture.Bloquer(badge);
+
+        // QUAND le Moteur d'Ouverture effectue une interrogation des lecteurs
+        moteurOuverture.Interroger();
+
+        // ALORS le signal d'ouverture n'est pas envoyé à la porte
+        Assert.False(porte.OuvertureDemandée);
+    }
+
+    [Fact]
+    public void CasBadgeBloquéPuisDébloqué()
+    {
+        // ETANT DONNE une Porte reliée à un Lecteur, ayant détecté un Badge bloqué, puis débloqué
+        var porte = new PorteTest();
+        var lecteur = new LecteurTest();
+        var badge = new NuméroBadge(1);
+
+        lecteur.SimulerDétectionBadge(badge);
+
+        var moteurOuverture = new MoteurOuverture();
+        moteurOuverture.Associer(lecteur, porte);
+        moteurOuverture.Bloquer(badge);
+        moteurOuverture.Débloquer(badge);
+
+        // QUAND le Moteur d'Ouverture effectue une interrogation des lecteurs
+        moteurOuverture.Interroger();
+
+        // ALORS le signal d'ouverture n'est pas envoyé à la porte
+        Assert.True(porte.OuvertureDemandée);
+    }
+
+    [Fact]
     public void CasAucuneInterrogation()
     {
         // ETANT DONNE une Porte reliée à un Lecteur, ayant détecté un Badge

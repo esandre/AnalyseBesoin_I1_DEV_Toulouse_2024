@@ -2,5 +2,5 @@
 
 public interface ILecteur
 {
-    bool BadgeDétecté { get; }
+    NuméroBadge? BadgeDétecté { get; }
 }

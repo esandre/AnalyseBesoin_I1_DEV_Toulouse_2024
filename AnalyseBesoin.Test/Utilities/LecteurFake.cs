@@ -2,20 +2,20 @@
 
 public class LecteurFake : ILecteur
 {
-    public bool BadgeDétecté
+    public NuméroBadge? BadgeDétecté
     {
         get
         {
             var returnedValue = _détectionSimulée;
-            _détectionSimulée = false;
+            _détectionSimulée = null;
             return returnedValue;
         }
     }
 
-    private bool _détectionSimulée;
+    private NuméroBadge? _détectionSimulée;
 
-    public void SimulerDétectionBadge()
+    public void SimulerDétectionBadge(NuméroBadge? badge = null)
     {
-        _détectionSimulée = true;
+        _détectionSimulée = badge ?? new NuméroBadge(0);
     }
 }

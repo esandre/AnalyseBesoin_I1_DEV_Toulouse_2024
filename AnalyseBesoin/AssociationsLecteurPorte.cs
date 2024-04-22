@@ -4,7 +4,7 @@ internal class AssociationsLecteurPorte
 {
     private readonly HashSet<(ILecteur Lecteur, IPorte Porte)> _associations = [];
 
-    public IEnumerable<Lecteur> LecteursAyantDétectéUnBadge
+    public IEnumerable<DemandeOuverture> LecteursAyantDétectéUnBadge
     {
         get
         {
@@ -13,9 +13,9 @@ internal class AssociationsLecteurPorte
             foreach (var groupe in groupes)
             {
                 var badgeDétecté = groupe.Key.BadgeDétecté;
-                if(!badgeDétecté) continue;
+                if(badgeDétecté == default) continue;
 
-                yield return new Lecteur(groupe.Select(t => t.Porte));
+                yield return new DemandeOuverture(groupe.Select(t => t.Porte), badgeDétecté);
             }
         }
     }
@@ -25,13 +25,15 @@ internal class AssociationsLecteurPorte
         _associations.Add((lecteur, porte));
     }
 
-    internal class Lecteur
+    internal class DemandeOuverture
     {
-        public Lecteur(IEnumerable<IPorte> portes)
+        public DemandeOuverture(IEnumerable<IPorte> portes, NuméroBadge badgeDetecté)
         {
             Portes = portes;
+            BadgeDétecté = badgeDetecté;
         }
 
         public IEnumerable<IPorte> Portes { get; }
+        public NuméroBadge BadgeDétecté { get; }
     }
 }
