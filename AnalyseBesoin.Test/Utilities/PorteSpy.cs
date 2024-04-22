@@ -2,10 +2,11 @@
 
 public class PorteSpy : IPorte
 {
-    public bool OuvertureDemandée { get; private set; }
+    public bool OuvertureDemandée => NombreOuverturesDemandées > 0;
+    public int NombreOuverturesDemandées { get; private set; }
 
     public void Ouvrir()
     {
-        OuvertureDemandée = true;
+        NombreOuverturesDemandées++;
     }
 }

@@ -2,18 +2,23 @@
 
 public class MoteurOuverture
 {
-    private readonly IDictionary<ILecteur, IPorte> _associations 
-        = new Dictionary<ILecteur, IPorte>();
+    private readonly AssociationsLecteurPorte _associations = new ();
 
     public void Interroger()
     {
-        foreach (var (lecteur, porte) in _associations)
-            if(lecteur.BadgeDétecté)
-                porte.Ouvrir();
+        var lecteurs = _associations.LecteursAyantDétectéUnBadge;
+        var portesAOuvrir = new HashSet<IPorte>();
+
+        foreach (var lecteur in lecteurs)
+        foreach (var porte in lecteur.Portes)
+            portesAOuvrir.Add(porte);
+
+        foreach (var porte in portesAOuvrir)
+            porte.Ouvrir();
     }
 
     public void Associer(ILecteur lecteur, IPorte porte)
     {
-        _associations.Add(lecteur, porte);
+        _associations.Enregistrer(lecteur, porte);
     }
 }
