@@ -2,20 +2,24 @@
 
 public class PorteSpy : IPorte
 {
+    private readonly IPorte _comportement;
     public bool OuvertureDemandée => NombreOuverturesDemandées > 0;
     public int NombreOuverturesDemandées { get; private set; }
-
-    private List<(bool R, bool V, bool B)> _invocations = new ();
 
     public void Ouvrir()
     {
         NombreOuverturesDemandées++;
+        _comportement.Ouvrir();
     }
 
-    public void Light(bool r, bool v, bool b)
+    public bool EstBloquée => _comportement.EstBloquée;
+
+    public PorteSpy(IPorte comportement)
     {
-        _invocations.Add((r, v, b));
+        _comportement = comportement;
     }
 
-    public int NombreFlashsViolets => _invocations.Count(invocation => invocation is { R: true, B: true, V: false });
+    public PorteSpy() : this(new PorteStub())
+    {
+    }
 }

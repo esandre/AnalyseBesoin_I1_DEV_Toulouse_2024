@@ -1,4 +1,6 @@
+using AnalyseBesoin.Test.Utilities;
 using PorteTest = AnalyseBesoin.Test.Utilities.PorteSpy;
+using PorteDéfaillante = AnalyseBesoin.Test.Utilities.PorteDummy;
 using LecteurTest = AnalyseBesoin.Test.Utilities.LecteurFake;
 
 namespace AnalyseBesoin.Test;
@@ -44,6 +46,31 @@ public class ControleAccesTest
         // ALORS le signal d'ouverture est envoyé aux deux portes
         Assert.True(porte1.OuvertureDemandée);
         Assert.True(porte2.OuvertureDemandée);
+    }
+
+    [Fact]
+    public void CasAlambiqué()
+    {
+        // ETANT DONNE deux Portes, dont une Bloquée, reliées à un Lecteur, ayant détecté un Badge
+        var porteBloquée = new PorteBuilder().Bloquée().Build();
+        var porteNonBloquée = new PorteBuilder().NonBloquée().Build();
+            
+            //new PorteSpy(new PorteFake(estBloquée: true));
+        //var porteNonBloquée = new PorteSpy(new PorteFake(estBloquée: false));
+        var lecteur = new LecteurTest();
+
+        lecteur.SimulerDétectionBadge();
+
+        var moteurOuverture = new MoteurOuverture();
+        moteurOuverture.Associer(lecteur, porteBloquée);
+        moteurOuverture.Associer(lecteur, porteNonBloquée);
+
+        // QUAND le Moteur d'Ouverture effectue une interrogation des lecteurs
+        moteurOuverture.Interroger();
+
+        // ALORS le signal d'ouverture n'est envoyé qu'à la porte non-bloquée
+        Assert.False(porteBloquée.OuvertureDemandée);
+        Assert.True(porteNonBloquée.OuvertureDemandée);
     }
 
     [Fact]
@@ -195,5 +222,24 @@ public class ControleAccesTest
         // ALORS seule la Porte reliée au Lecteur reçoit le signal d'ouverture
         Assert.False(porteDevantResterFermée.OuvertureDemandée);
         Assert.True(porteDevantSOuvrir.OuvertureDemandée);
+    }
+
+    [Fact]
+    public void PorteDefaillante()
+    {
+        // ETANT DONNE une Porte défaillante reliée à un Lecteur, ayant détecté un Badge
+        var porte = new PorteDéfaillante();
+        var lecteur = new LecteurTest();
+
+        lecteur.SimulerDétectionBadge();
+
+        var moteurOuverture = new MoteurOuverture();
+        moteurOuverture.Associer(lecteur, porte);
+
+        // QUAND le Moteur d'Ouverture effectue une interrogation des lecteurs
+        void Act() => moteurOuverture.Interroger();
+
+        // ALORS l'exception n'est pas avalée
+        Assert.Throws<Exception>(Act);
     }
 }
