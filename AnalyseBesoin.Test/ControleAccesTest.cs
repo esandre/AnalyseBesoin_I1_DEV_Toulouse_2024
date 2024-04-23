@@ -1,5 +1,6 @@
 using AnalyseBesoin.Test.Utilities;
 using PorteTest = AnalyseBesoin.Test.Utilities.PorteSpy;
+using Porte = AnalyseBesoin.Test.Utilities.PorteBuilder;
 using PorteDéfaillante = AnalyseBesoin.Test.Utilities.PorteDummy;
 using LecteurTest = AnalyseBesoin.Test.Utilities.LecteurFake;
 
@@ -52,11 +53,9 @@ public class ControleAccesTest
     public void CasAlambiqué()
     {
         // ETANT DONNE deux Portes, dont une Bloquée, reliées à un Lecteur, ayant détecté un Badge
-        var porteBloquée = new PorteBuilder().Bloquée().Build();
-        var porteNonBloquée = new PorteBuilder().NonBloquée().Build();
+        var porteBloquée = Porte.DeTest().Bloquée().Build();
+        var porteNonBloquée = Porte.DeTest().NonBloquée().Build();
             
-            //new PorteSpy(new PorteFake(estBloquée: true));
-        //var porteNonBloquée = new PorteSpy(new PorteFake(estBloquée: false));
         var lecteur = new LecteurTest();
 
         lecteur.SimulerDétectionBadge();
@@ -71,6 +70,30 @@ public class ControleAccesTest
         // ALORS le signal d'ouverture n'est envoyé qu'à la porte non-bloquée
         Assert.False(porteBloquée.OuvertureDemandée);
         Assert.True(porteNonBloquée.OuvertureDemandée);
+    }
+
+    [Fact]
+    public void CasUnePorteDéfaillante()
+    {
+        // ETANT DONNE deux Portes, dont une défaillante, reliées à un Lecteur, ayant détecté un Badge
+        var porteNormale = Porte.DeTest().Build();
+        var porteDéfaillante = Porte.Défaillante();
+            
+        var lecteur = new LecteurTest();
+
+        lecteur.SimulerDétectionBadge();
+
+        var moteurOuverture = new MoteurOuverture();
+        moteurOuverture.Associer(lecteur, porteDéfaillante);
+        moteurOuverture.Associer(lecteur, porteNormale);
+
+        // QUAND le Moteur d'Ouverture effectue une interrogation des lecteurs
+        void Act() => moteurOuverture.Interroger();
+
+        // ALORS le signal d'ouverture est envoyé aux deux portes
+        Assert.ThrowsAny<Exception>(Act);
+        Assert.True(porteNormale.OuvertureDemandée);
+        Assert.True(porteDéfaillante.OuvertureDemandée);
     }
 
     [Fact]
@@ -240,6 +263,6 @@ public class ControleAccesTest
         void Act() => moteurOuverture.Interroger();
 
         // ALORS l'exception n'est pas avalée
-        Assert.Throws<Exception>(Act);
+        Assert.ThrowsAny<Exception>(Act);
     }
 }

@@ -20,9 +20,7 @@ public class MoteurOuverture
                 portesAOuvrir.Add(porte);
         }
             
-
-        foreach (var porte in portesAOuvrir)
-            porte.Ouvrir();
+        portesAOuvrir.AsParallel().ForAll(porte => porte.Ouvrir());
     }
 
     public void Associer(ILecteur lecteur, IPorte porte)

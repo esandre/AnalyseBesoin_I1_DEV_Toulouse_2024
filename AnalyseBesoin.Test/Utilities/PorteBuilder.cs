@@ -4,7 +4,7 @@ internal class PorteBuilder
 {
     private bool _bloquée;
 
-    public static PorteBuilder DeTest() => new PorteBuilder();
+    public static PorteBuilder DeTest() => new ();
 
     public PorteSpy Build()
     {
@@ -22,5 +22,10 @@ internal class PorteBuilder
     {
         _bloquée = false;
         return this;
+    }
+
+    public static PorteSpy Défaillante()
+    {
+        return new PorteSpy(new PorteDummy());
     }
 }
