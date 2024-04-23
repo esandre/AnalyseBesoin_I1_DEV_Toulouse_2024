@@ -1,5 +1,5 @@
+using AnalyseBesoin.Test.Utilities;
 using Moq;
-using PorteTest = AnalyseBesoin.Test.Utilities.PorteSpy;
 using Porte = AnalyseBesoin.Test.Utilities.PorteBuilder;
 using LecteurTest = AnalyseBesoin.Test.Utilities.LecteurFake;
 
@@ -11,7 +11,7 @@ public class ControleAccesTest
     public void CasNominal()
     {
         // ETANT DONNE une Porte reliée à un Lecteur, ayant détecté un Badge
-        var porte = new PorteTest();
+        var porte = Porte.DeTest().Build();
         var lecteur = new LecteurTest();
 
         lecteur.SimulerDétectionBadge();
@@ -23,15 +23,15 @@ public class ControleAccesTest
         moteurOuverture.Interroger();
 
         // ALORS le signal d'ouverture est envoyé à la porte
-        Assert.True(porte.OuvertureDemandée);
+        porte.VérifierOuvertureDemandée(Times.Once());
     }
 
     [Fact]
     public void Cas2Portes()
     {
         // ETANT DONNE deux Portes reliée à un Lecteur, ayant détecté un Badge
-        var porte1 = new PorteTest();
-        var porte2 = new PorteTest();
+        var porte1 = Porte.DeTest().Build();
+        var porte2 = Porte.DeTest().Build();
         var lecteur = new LecteurTest();
 
         lecteur.SimulerDétectionBadge();
@@ -44,8 +44,8 @@ public class ControleAccesTest
         moteurOuverture.Interroger();
 
         // ALORS le signal d'ouverture est envoyé aux deux portes
-        Assert.True(porte1.OuvertureDemandée);
-        Assert.True(porte2.OuvertureDemandée);
+        porte1.VérifierOuvertureDemandée(Times.Once());
+        porte2.VérifierOuvertureDemandée(Times.Once());
     }
 
     [Fact]
@@ -67,8 +67,8 @@ public class ControleAccesTest
         moteurOuverture.Interroger();
 
         // ALORS le signal d'ouverture n'est envoyé qu'à la porte non-bloquée
-        Assert.False(porteBloquée.OuvertureDemandée);
-        Assert.True(porteNonBloquée.OuvertureDemandée);
+        porteBloquée.VérifierOuvertureDemandée(Times.Never());
+        porteNonBloquée.VérifierOuvertureDemandée(Times.Once());
     }
 
     [Fact]
@@ -91,15 +91,16 @@ public class ControleAccesTest
 
         // ALORS le signal d'ouverture est envoyé aux deux portes
         Assert.ThrowsAny<Exception>(Act);
-        Assert.True(porteNormale.OuvertureDemandée);
-        Mock.Get(porteDéfaillante).Verify(m => m.Ouvrir(), Times.Once);
+
+        porteNormale.VérifierOuvertureDemandée(Times.Once());
+        porteDéfaillante.VérifierOuvertureDemandée(Times.Once());
     }
 
     [Fact]
     public void Cas2Lecteurs()
     {
         // ETANT DONNE une Porte reliée à deux Lecteurs, ayant tous les deux détecté un Badge
-        var porte = new PorteTest();
+        var porte = Porte.DeTest().Build();
 
         var lecteur1 = new LecteurTest();
         lecteur1.SimulerDétectionBadge();
@@ -115,14 +116,14 @@ public class ControleAccesTest
         moteurOuverture.Interroger();
 
         // ALORS un seul signal d'ouverture est envoyé à la Porte
-        Assert.Equal(1, porte.NombreOuverturesDemandées);
+        porte.VérifierOuvertureDemandée(Times.Once());
     }
 
     [Fact]
     public void CasBadgeBloqué()
     {
         // ETANT DONNE une Porte reliée à un Lecteur, ayant détecté un Badge bloqué
-        var porte = new PorteTest();
+        var porte = Porte.DeTest().Build();
         var lecteur = new LecteurTest();
         var badge = new NuméroBadge(1);
 
@@ -136,14 +137,14 @@ public class ControleAccesTest
         moteurOuverture.Interroger();
 
         // ALORS le signal d'ouverture n'est pas envoyé à la porte
-        Assert.False(porte.OuvertureDemandée);
+        porte.VérifierOuvertureDemandée(Times.Never());
     }
 
     [Fact]
     public void CasBadgeBloquéPuisDébloqué()
     {
         // ETANT DONNE une Porte reliée à un Lecteur, ayant détecté un Badge bloqué, puis débloqué
-        var porte = new PorteTest();
+        var porte = Porte.DeTest().Build();
         var lecteur = new LecteurTest();
         var badge = new NuméroBadge(1);
 
@@ -157,15 +158,15 @@ public class ControleAccesTest
         // QUAND le Moteur d'Ouverture effectue une interrogation des lecteurs
         moteurOuverture.Interroger();
 
-        // ALORS le signal d'ouverture n'est pas envoyé à la porte
-        Assert.True(porte.OuvertureDemandée);
+        // ALORS le signal d'ouverture est envoyé à la porte
+        porte.VérifierOuvertureDemandée(Times.Once());
     }
 
     [Fact]
     public void CasAucuneInterrogation()
     {
         // ETANT DONNE une Porte reliée à un Lecteur, ayant détecté un Badge
-        var porte = new PorteTest();
+        var porte = Porte.DeTest().Build();
         var lecteur = new LecteurTest();
 
         lecteur.SimulerDétectionBadge();
@@ -174,14 +175,14 @@ public class ControleAccesTest
         moteurOuverture.Associer(lecteur, porte);
 
         // ALORS le signal d'ouverture n'est pas envoyé à la porte
-        Assert.False(porte.OuvertureDemandée);
+        porte.VérifierOuvertureDemandée(Times.Never());
     }
 
     [Fact]
     public void CasNonBadgé()
     {
         // ETANT DONNE une Porte reliée à un Lecteur, n'ayant pas détecté un Badge
-        var porte = new PorteTest();
+        var porte = Porte.DeTest().Build();
         var lecteur = new LecteurTest();
 
         var moteurOuverture = new MoteurOuverture();
@@ -191,7 +192,7 @@ public class ControleAccesTest
         moteurOuverture.Interroger();
 
         // ALORS le signal d'ouverture n'est pas envoyé à la porte
-        Assert.False(porte.OuvertureDemandée);
+        porte.VérifierOuvertureDemandée(Times.Never());
     }
 
     [Fact]
@@ -200,8 +201,8 @@ public class ControleAccesTest
         // ETANT DONNE un Lecteur ayant détecté un Badge
         // ET un autre Lecteur n'ayant rien détecté
         // ET une Porte reliée chacune à un Lecteur
-        var porteDevantSOuvrir = new PorteTest();
-        var porteDevantResterFermée = new PorteTest();
+        var porteDevantSOuvrir = Porte.DeTest().Build();
+        var porteDevantResterFermée = Porte.DeTest().Build();
 
         var lecteurAyantDétecté = new LecteurTest();
         lecteurAyantDétecté.SimulerDétectionBadge();
@@ -216,8 +217,8 @@ public class ControleAccesTest
         moteurOuverture.Interroger();
 
         // ALORS seule la Porte reliée au Lecteur reçoit le signal d'ouverture
-        Assert.False(porteDevantResterFermée.OuvertureDemandée);
-        Assert.True(porteDevantSOuvrir.OuvertureDemandée);
+        porteDevantResterFermée.VérifierOuvertureDemandée(Times.Never());
+        porteDevantSOuvrir.VérifierOuvertureDemandée(Times.Once());
     }
 
     [Fact]
@@ -226,8 +227,8 @@ public class ControleAccesTest
         // ETANT DONNE un Lecteur ayant détecté un Badge
         // ET un autre Lecteur n'ayant rien détecté
         // ET une Porte reliée chacune à un Lecteur
-        var porteDevantSOuvrir = new PorteTest();
-        var porteDevantResterFermée = new PorteTest();
+        var porteDevantSOuvrir = Porte.DeTest().Build();
+        var porteDevantResterFermée = Porte.DeTest().Build();
 
         var lecteurAyantDétecté = new LecteurTest();
         lecteurAyantDétecté.SimulerDétectionBadge();
@@ -242,8 +243,8 @@ public class ControleAccesTest
         moteurOuverture.Interroger();
 
         // ALORS seule la Porte reliée au Lecteur reçoit le signal d'ouverture
-        Assert.False(porteDevantResterFermée.OuvertureDemandée);
-        Assert.True(porteDevantSOuvrir.OuvertureDemandée);
+        porteDevantResterFermée.VérifierOuvertureDemandée(Times.Never());
+        porteDevantSOuvrir.VérifierOuvertureDemandée(Times.Once());
     }
 
     [Fact]

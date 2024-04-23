@@ -19,8 +19,10 @@ public class MoteurOuverture
             foreach (var porte in lecteur.Portes)
                 portesAOuvrir.Add(porte);
         }
-            
-        portesAOuvrir.AsParallel().ForAll(porte => porte.Ouvrir());
+
+        portesAOuvrir.Where(porte => !porte.EstBloquée)
+            .AsParallel()
+            .ForAll(porte => porte.Ouvrir());
     }
 
     public void Associer(ILecteur lecteur, IPorte porte)

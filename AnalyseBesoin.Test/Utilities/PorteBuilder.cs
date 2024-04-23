@@ -1,4 +1,6 @@
 ﻿using Moq;
+using Dummy = Moq.Mock<AnalyseBesoin.IPorte>;
+using Fake = Moq.Mock;
 
 namespace AnalyseBesoin.Test.Utilities;
 
@@ -8,10 +10,10 @@ internal class PorteBuilder
 
     public static PorteBuilder DeTest() => new ();
 
-    public PorteSpy Build()
+    public IPorte Build()
     {
-        var comportement = Mock.Of<IPorte>(m => m.EstBloquée == _bloquée);
-        return new PorteSpy(comportement);
+        var comportement = Fake.Of<IPorte>(m => m.EstBloquée == _bloquée);
+        return comportement;
     }
 
     public PorteBuilder Bloquée()
@@ -28,6 +30,6 @@ internal class PorteBuilder
 
     public static IPorte Défaillante()
     {
-        return new Mock<IPorte>(MockBehavior.Strict).Object;
+        return new Dummy(MockBehavior.Strict).Object;
     }
 }
