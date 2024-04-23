@@ -1,7 +1,6 @@
-using AnalyseBesoin.Test.Utilities;
+using Moq;
 using PorteTest = AnalyseBesoin.Test.Utilities.PorteSpy;
 using Porte = AnalyseBesoin.Test.Utilities.PorteBuilder;
-using PorteDéfaillante = AnalyseBesoin.Test.Utilities.PorteDummy;
 using LecteurTest = AnalyseBesoin.Test.Utilities.LecteurFake;
 
 namespace AnalyseBesoin.Test;
@@ -93,7 +92,7 @@ public class ControleAccesTest
         // ALORS le signal d'ouverture est envoyé aux deux portes
         Assert.ThrowsAny<Exception>(Act);
         Assert.True(porteNormale.OuvertureDemandée);
-        Assert.True(porteDéfaillante.OuvertureDemandée);
+        Mock.Get(porteDéfaillante).Verify(m => m.Ouvrir(), Times.Once);
     }
 
     [Fact]
@@ -251,7 +250,7 @@ public class ControleAccesTest
     public void PorteDefaillante()
     {
         // ETANT DONNE une Porte défaillante reliée à un Lecteur, ayant détecté un Badge
-        var porte = new PorteDéfaillante();
+        var porte = Porte.Défaillante();
         var lecteur = new LecteurTest();
 
         lecteur.SimulerDétectionBadge();
