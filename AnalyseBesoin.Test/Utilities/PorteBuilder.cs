@@ -1,4 +1,6 @@
-﻿namespace AnalyseBesoin.Test.Utilities;
+﻿using Moq;
+
+namespace AnalyseBesoin.Test.Utilities;
 
 internal class PorteBuilder
 {
@@ -8,7 +10,7 @@ internal class PorteBuilder
 
     public PorteSpy Build()
     {
-        var comportement = new PorteFake(_bloquée);
+        var comportement = Mock.Of<IPorte>(m => m.EstBloquée == _bloquée);
         return new PorteSpy(comportement);
     }
 
@@ -24,8 +26,8 @@ internal class PorteBuilder
         return this;
     }
 
-    public static PorteSpy Défaillante()
+    public static IPorte Défaillante()
     {
-        return new PorteSpy(new PorteDummy());
+        return new Mock<IPorte>(MockBehavior.Strict).Object;
     }
 }
